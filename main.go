@@ -13,9 +13,13 @@ func main() {
 		listenAddr = ":8080"
 	}
 
+	app := App{
+		Log: log.New(os.Stdout, "example-app: ", 0),
+	}
+
 	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(OKHandler))
-	mux.Handle("/fake", http.HandlerFunc(NotFoundHandler))
+	mux.Handle("/", http.HandlerFunc(app.OKHandler))
+	mux.Handle("/fake", http.HandlerFunc(app.NotFoundHandler))
 
 	server := http.Server{
 		Addr:    listenAddr,
@@ -29,13 +33,20 @@ func main() {
 	}
 }
 
+// App represents an example web application.
+type App struct {
+	Log *log.Logger
+}
+
 // OKHandler responds to web requests with a 200 OK.
-func OKHandler(w http.ResponseWriter, r *http.Request) {
+func (a App) OKHandler(w http.ResponseWriter, r *http.Request) {
+	a.Log.Printf("%s", r.URL.Path)
 	respond(w, http.StatusText(http.StatusOK), http.StatusOK)
 }
 
 // NotFoundHandler responds to web requests with a 404 Not Found.
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+func (a App) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	a.Log.Printf("%s", r.URL.Path)
 	respond(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 }
 
